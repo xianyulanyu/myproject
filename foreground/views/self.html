@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>个人中心</title>
+  <link rel="stylesheet" href="../lib/layui/css/layui.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/form.css">
+  <script src="../lib/jquery.js"></script>
+   <!-- <link rel="stylesheet" href="path/to/layui.css" media="all"> -->
+<script src="../lib/layui/layui.js"></script>
+<script src="../lib/axios.js"></script>
+</head>
+
+<body>
+  <div class="header container">个人中心
+    <p style="display: block;">
+      <a href="./rpwd.html">修改密码</a>
+      <a href="./index.html">回到首页</a>
+    </p>
+  </div>
+  <form id="self-container">
+    <label>
+      用户名： <input type="text" class="username" disabled>
+    </label>
+    <label>
+      年龄： <input type="text" class="age">
+    </label>
+    <label>
+      性别： <select class='gender'>
+        <option value="">请选择</option>
+        <option value="男">男</option>
+        <option value="女">女</option>
+      </select>
+    </label>
+    <label>
+      昵称： <input type="text" class="nickname">
+    </label>
+    <button type="submit">确认修改</button>
+  </form>
+
+</body>
+
+</html>
+<script>
+   $(document).ready(function () {
+    // console.log(JSON.parse(localStorage.getItem('user')).username);
+  
+
+   
+    //  获取用户信息
+     const getUserInfo = function() {
+      console.log();
+  
+  axios({
+       method: "get",
+       url: "http://localhost:9000/users/info",
+       params:{
+       id: JSON.parse(localStorage.getItem('userInfo')).id, 
+     },
+     headers:{
+      Authorization:  sessionStorage.getItem('token'),
+       'content-type':"application/json"
+     }
+     }).then(res => {
+   if(res.data.code == 1) {
+     //  清空用户信息
+     localStorage.setItem('user',JSON.stringify(res.data.user))
+     $('.username').val(res.data.user.username)
+    $('.nickname').val(res.data.user.nickname)
+    $(".gender").val(res.data.user.gender);
+    $(".age").val(res.data.user.age);
+        // window.location.href='login.html';
+   }
+     })
+}  
+console.log(123);
+getUserInfo()
+
+       // 修改用户信息api 
+   $("#self-container").submit(function (event) {
+    var age = $(".age").val();
+     var gender = $(".gender").val();
+     var nickname = $(".nickname").val()
+      event.preventDefault();
+      axios({
+      method: "post",
+        url: "http://localhost:9000/users/update",
+        data:{
+          age: age,
+          gender: gender,
+          nickname: nickname,
+          id: JSON.parse(localStorage.getItem('userInfo')).id, 
+        },
+        headers:{
+      Authorization:  sessionStorage.getItem('token'),
+       'content-type':"application/json"
+     }
+    }).then(res => {
+        console.log(res);
+      if(res.data.code == 1) {
+        layer.msg('修改成功', {icon: 6, time: 1000}); 
+        getUserInfo()
+       
+      }else {
+        layer.msg(res.data.message, {icon: 7, time: 1000});
+      }
+    })
+    })
+    console.log(123);
+  })  
+    
+ 
+    
+    
+
+
+</script>

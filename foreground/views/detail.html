@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>商品详情页</title>
+  <link rel="stylesheet" href="../css/detail.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../lib/layui/css/layui.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/form.css">
+
+  <script src="../lib/axios.js"></script>
+  <script src="../lib/jquery.js"></script>
+  <script src="../lib/layui/layui.js"></script>
+</head>
+
+<body>
+  <div class="header container">
+    商品详情页
+    <p style="display: block;">      
+      <a href="./list.html">回到列表页</a>
+    </p>
+  </div>
+
+  <div class="content container">
+    <!-- 重新js渲染 -->
+    <div class="left box">
+      <div class="middleBox">
+        <img src="https://image5.suning.cn/uimg/b2c/newcatentries/0070081143-000000000144879464_2_800x800.jpg"
+          class="middleimg">
+      </div>
+    </div>
+    <div class="right">
+      <p class="title">商品名称</p>
+      <p class="price">原价: ¥ <span class="old">25.00</span></p>
+      <p class="price">折扣: ¥ <span class="discount">0.7</span></p>
+      <p class="price">现价: ¥ <span class="curprice">17.50</span></p>
+    </div>
+  </div>
+  <!-- 商品详情描述: 注意.desc的所有内容都应该按照具体商品详情渲染 -->
+  <div class="desc container">    
+    <div class="lazyimg">
+     
+    </div>
+
+  </div>
+</body>
+
+</html>
+
+<script>
+
+    $(document).ready(function () {
+   const getURLParameter =   function (name) {
+    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    return results ? decodeURIComponent(results[1]) : undefined;
+}
+     const goosId =  getURLParameter('id')
+     console.log(goosId);
+         // 获取商品详情 /goods/item
+      
+         const getGoodsItem = function() {
+      console.log();
+  axios({
+       method: "get",
+       url: "http://localhost:9000/goods/item",
+       params:{
+       id: goosId, 
+      
+     },
+     headers:{
+      Authorization:  sessionStorage.getItem('token'),
+       'content-type':"application/json"
+     }
+     }).then(res => {
+   if(res.data.code == 1) {
+    $('.title').text(res.data.info.title)
+    $('.old').text(res.data.info.price)
+    $('.discount').text(res.data.info.sale_type)
+    $('.curprice').text(res.data.info.current_price)
+    $('.middleimg').attr('src',res.data.info.img_big_logo)
+    console.log(res.data.info.goods_introduce);
+    let newDom = $(res.data.info.goods_introduce)
+    console.log(newDom);
+    $('lazyimg').append(newDom)
+     //  清空用户信息
+   }
+     })
+} 
+getGoodsItem()
+    })
+
+
+</script>

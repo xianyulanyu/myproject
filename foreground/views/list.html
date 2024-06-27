@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>商品列表</title>
+  <link rel="stylesheet" href="../lib/layui/css/layui.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/list.css">
+  <script src="../lib/jquery.js"></script>
+  <script src="../lib/layui/layui.js"></script>
+  <script src="../lib/axios.js"></script>
+</head>
+
+<body>
+  <div class="header container">
+    仿站电商 · 商品列表
+    <p style="display: block;">      
+      <a href="./index.html">回到首页</a>
+    </p>
+  </div>
+
+  <div class="filter container">
+    <div class="cateBox">
+      <p>分类</p>
+      <ul class="category">
+        <!-- js渲染 -->
+        <li class="active">全部</li>
+ 
+      </ul>
+    </div>
+    <div class="cateBox">
+      <p>筛选</p>
+      <ul class="filterBox shaixuan">
+        <li data-type='' class="active">全部</li>
+        <li data-type='hot'>热销</li>
+        <li data-type='sale'>折扣</li>
+      </ul>
+    </div>
+    <div class="cateBox">
+      <p>折扣</p>
+      <ul class="filterBox saleBox">
+        <li data-type="10" class="active">全部</li>
+        <li data-type="5">5折</li>
+        <li data-type="6">6折</li>
+        <li data-type="7">7折</li>
+        <li data-type="8">8折</li>
+        <li data-type="9">9折</li>
+      </ul>
+    </div>
+    <div class="cateBox">
+      <p>排序</p>
+      <ul class="filterBox sortBox">
+        <li data-type="id" data-method="ASC" class="active">综合 正序</li>
+        <li data-type="id" data-method="DESC">综合 倒序</li>
+        <li data-type="sale" data-method="ASC">折扣 正序</li>
+        <li data-type="sale" data-method="DESC">折扣 倒序</li>
+        <li data-type="price" data-method="ASC">价格 正序</li>
+        <li data-type="price" data-method="DESC">价格 倒序</li>
+      </ul>
+    </div>
+    <div class="cateBox">
+      <p>搜索</p>
+      <input type="text" class="search">
+    </div>
+  </div>
+
+  <div class="pagination container">
+    <span class="first disable" >首页</span>
+    <span class="prev disable">上一页</span>
+    <p class="current">1</p>/
+    <p class="total">10</p>
+    <span class="next">下一页</span>
+    <span class="last">末页</span>
+    <input type="number" class="jump" value="1"><button class="go">跳转</button>
+    <select class="pagesize">
+      <option value="12">12</option>
+      <option value="16">16</option>
+      <option value="20">20</option>
+      <option value="24">24</option>
+    </select>
+  </div>
+
+  <ul class="list container">
+    <!-- 如果筛选或搜索中 没有商品则展示一下图片 -->
+    <img class="noList" src="../img/no.png">
+    <!-- js渲染的数据 -->
+    <li data-id="3" id="li">
+      <div class="show">
+        <img class="img" src="https://image4.suning.cn/uimg/b2c/newcatentries/0070081143-000000000131021736_2_800x800.jpg">
+        <span class="hot">热销</span>
+        <span>折扣</span>
+      </div>
+      <div class="info">
+        <p class="title">南极人 【5双礼盒装】男士袜子中筒棉袜四季商务袜透气袜子男P3014</p>
+        <p class="price">
+          <span class="curr">¥ 17.40</span>
+          <span class="old">¥ 29.00</span>
+        </p>        
+      </div>
+    </li>
+  </ul>
+  <div class="footer container">页面底部</div>
+</body>
+
+
+</html>
+<script>
+    $(document).ready(function () {
+        let filter = ''
+        let saleType = 10
+        let sortType = ''
+        let sortMethod = ''
+        let category = ''
+    // 商品列表
+    const list = []
+    console.log(123);
+      //  循环创建列表
+const  createListDom = function(list) {
+  console.log(list);
+  $.each(list, function(index, value) { 
+    var newItem = $('#li').first().clone()
+    console.log(newItem);
+    console.log(newItem.children('.img').attr('src'));
+    newItem.find('img').attr('src',value.img_big_logo);
+    newItem.find('.title').text(value.title)
+    newItem.find('.curr').text(value.current_price)
+    newItem.find('.old').text(value.price)
+    newItem.find('.title').text(value.title)
+    newItem.click(() => {
+      console.log(value);
+      window.location.href='detail.html' + '?' + 'id=' + value.goods_id;
+    })
+    $('.list').append(newItem)
+  })
+  $('#li').first().hide();
+
+  console.log(12345);
+}
+// 获取分类列表 
+const getCategory = function () {
+    $('.category').children(li).first().siblings().remove();
+    axios({
+      method: "get",
+        url: "http://localhost:9000/goods/category",
+        params:{
+         
+    }}).then(res => {
+        if(res.data.code == 1){
+            createCategoryDom(res.data.list)
+        }
+    })
+}
+const  createCategoryDom = function(list) {
+  console.log(list);
+  $.each(list, function(index, value) { 
+    var newItem = $('.category').children(li).first().clone()
+    console.log(newItem);
+    console.log(newItem.children('.img').attr('src'));
+    newItem.text(value)
+    newItem.removeClass('active')
+    $('.category').append(newItem)
+  })
+//   $('#li').first().remove();
+}
+getCategory()
+// 获取商品list
+   const getList = function () {
+    $('#li').first().show();
+    $('#li').first().siblings().remove();
+    console.log($('.current').text());
+    axios({
+      method: "get",
+        url: "http://localhost:9000/goods/list",
+        params:{
+          current: $('.current').text(),
+          pagesize: $('.pagesize').val(),
+          search: $('.search').val(),
+          filter:  filter,
+          saleType: saleType,
+          sortType: sortType,
+          sortMethod:sortMethod,
+          category: category
+    }}).then(res => {
+        console.log(res);
+      if(res.data.code == 1) {
+        console.log(Math.ceil(res.data.total /  $('.pagesize').val()));
+        $('.total').text(Math.ceil(res.data.total /  $('.pagesize').val())) 
+        if(res.data.list.length) {
+            $('.noList').hide()
+            createListDom(res.data.list)
+        }else {
+            $('#li').hide()
+        $('.noList').show()
+        $('.next').addClass('disable')
+    $('.last').addClass('disable');
+        }
+       
+      }
+    })
+   }
+   getList()
+//  点击下一页
+ $('.next').click(() => {
+    console.log('yanse',$('.next').css("color") ==  'rgb(204, 204, 204)');
+    if($('.next').css("color") ==  'rgb(204, 204, 204)'){
+    
+    }else {
+        let currentVal =   parseInt($('.current').text());
+ console.log(123);
+ $('.current').text(currentVal + 1);
+ console.log(parseInt($('.current').text()) > 1);
+ if(parseInt($('.current').text()) > 1) {
+    $('.first').removeClass('disable');
+    $('.prev').removeClass('disable');
+ }
+ if(parseInt($('.current').text()) == parseInt($('.total').text())) {
+    $('.next').addClass('disable')
+    $('.last').addClass('disable');
+ }
+ getList()
+    }
+
+ })
+ //  点击上一页
+ $('.prev').click(() => {
+    console.log('yanse',$('.next').css("color") ==  'rgb(204, 204, 204)');
+    if($('.prev').css("color") ==  'rgb(204, 204, 204)'){
+    
+    }else {
+        let currentVal =   parseInt($('.current').text());
+ console.log(123);
+ $('.current').text(currentVal - 1);
+ console.log(parseInt($('.current').text()) > 1);
+ if(parseInt($('.current').text()) < 2) {
+    $('.first').addClass('disable');
+    $('.prev').addClass('disable');
+ }
+ if(parseInt($('.current').text()) != parseInt($('.total').text())) {
+    $('.next').removeClass('disable')
+    $('.last').removeClass('disable');
+ }
+ getList()
+    }
+
+ })
+//  点击首页
+$('.first').click(() => {
+    console.log($('.first').css("color")==  'rgb(204, 204, 204)');
+    if($('.first').css("color") ==  'rgb(204, 204, 204)'){
+
+    } else {
+
+    $('.current').text(1);
+    $('.first').addClass('disable')
+    $('.prev').addClass('disable');
+    $('.next').removeClass('disable');
+    $('.last').removeClass('disable');
+    getList()
+    }
+   
+})
+//  点击末页
+$('.last').click(() => {
+    console.log($('.first').css("color")==  'rgb(204, 204, 204)');
+    if($('.last').css("color") ==  'rgb(204, 204, 204)'){
+
+    } else {
+
+    $('.current').text($('.total').text());
+    $('.last').addClass('disable')
+    $('.next').addClass('disable');
+    $('.first').removeClass('disable');
+    $('.prev').removeClass('disable');
+    getList()
+    }
+   
+})
+// 切换页
+$('.pagesize').change(() => {
+    getList()
+})
+// 跳转
+$('.go').click(() => {
+    console.log($('.jump').val())
+    if($('.jump').val() >  $('.total').text()) {
+        
+        $('.jump').val($('.total').text())
+        console.log( $('.jump').val());
+    } else if($('.jump').val() <  1 ) {
+        $('.jump').val(1)
+    }
+    $('.current').text($('.jump').val())
+    getList()
+})
+// 搜索
+$('.search').change(() => {
+  $('.current').text(1)
+    console.log($('.search').val());
+    console.log(category);
+    getList()
+})
+//   分类
+$('.category').on('click', 'li',function() {
+  $('.current').text(1)
+    console.log(1232);
+    $('.category').children().each(function() {
+        $(this).removeClass('active');
+    })
+    console.log('子节点被点击:', );
+    $(this).addClass('active')
+    console.log();
+     category =  $(this).text()
+    getList()
+   
+    
+} )
+
+// 筛选
+$('.shaixuan').on('click', 'li',function() {
+  $('.current').text(1)
+    console.log(1232);
+    $('.shaixuan').children().each(function() {
+        $(this).removeClass('active');
+    })
+    console.log('子节点被点击:', );
+    $(this).addClass('active')
+    console.log();
+    filter =  $(this).attr("data-type")
+    getList()
+   
+    
+} )
+// 折扣
+$('.saleBox').on('click', 'li',function() {
+  $('.current').text(1)
+    console.log(1232);
+    $('.saleBox').children().each(function() {
+        $(this).removeClass('active');
+    })
+    console.log('子节点被点击:', );
+    $(this).addClass('active')
+    console.log();
+    saleType =  $(this).attr("data-type")
+    getList()
+   
+    
+} )
+// 排序
+$('.sortBox').on('click', 'li',function() {
+  $('.current').text(1)
+    console.log(1232);
+    $('.sortBox').children().each(function() {
+        $(this).removeClass('active');
+    })
+    console.log('子节点被点击:', );
+    $(this).addClass('active')
+
+    sortType = $(this).attr("data-type")
+    sortMethod =  $(this).attr("data-method")
+    getList()  
+} )
+// $('.filterBox')[0].children() 
+  });
+
+
+</script>

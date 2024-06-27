@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>注册页面</title>
+  <link rel="stylesheet" href="../lib/layui/css/layui.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/form.css">
+
+  <script src="../lib/axios.js"></script>
+  <script src="../lib/jquery.js"></script>
+  <script src="../lib/layui/layui.js"></script>
+</head>
+<body>
+  <div class="header container">注册页面</div>
+  <form id="register-container">
+    <span class="error">用户名已存在，请更换！</span>
+    <label>
+      用户名：&nbsp;&nbsp; <input type="text" class="username">
+    </label>
+    <label>
+      密&nbsp;&nbsp;&nbsp;码： &nbsp;&nbsp;<input type="text" class="password">
+    </label>
+    <label>
+      确认密码： &nbsp;&nbsp;<input type="text" class="rpassword">
+    </label>
+    <label>
+      昵&nbsp;&nbsp;&nbsp;称：&nbsp;&nbsp; <input type="text" class="nickname">
+    </label>
+    <p>已有账号，<a href="./login.html">直接登录</a></p>
+    <button type="submit">注册</button>
+  </form>
+</body>
+</html>
+<script>
+  console.log(axios);
+ $(document).ready(function () {
+   console.log(123);
+  
+   // 当表单提交时
+   $("#register-container").submit(function (event) {
+     console.log(123);
+     event.preventDefault(); // 阻止表单默认提交行为
+
+     // 获取用户名和密码输入框的值
+     var username = $(".username").val();
+     var password = $(".password").val();
+     var rpassword = $(".rpassword").val();
+     var nickname = $(".nickname").val()
+     // 验证用户名和密码是否为空
+     if (username.trim() === "" || password.trim() === "") {
+       layer.msg('请输入用户名和密码！', {icon: 7, time: 1000});
+
+       return;
+     }else if (password.trim() === "") {
+        layer.msg('请输入密码', {icon: 7, time: 1000});
+        return;
+      }else if (rpassword.trim() === "") {
+        layer.msg('请确认密码', {icon: 7, time: 1000});
+        return;
+      } else if(rpassword.trim() !== password.trim()) {
+        layer.msg('两次密码不一致', {icon: 7, time: 1000});
+        return;
+      }else if(nickname.trim() == "") {
+        layer.msg('昵称不能为空', {icon: 7, time: 1000});
+        return;
+      }
+     axios({
+       method: "post",
+       url: "http://localhost:9000/users/register",
+       data:{
+       username:username,
+       password: password,
+       rpassword: rpassword,
+       nickname: nickname
+     },
+     headers:{
+       'content-type':"application/json"
+     }
+     }).then(function (res) { 
+       if(res.data.code == 5) {
+         if(res.data.message == '参数username格式错误'){
+           layer.msg('账号必须为3-11位的字母或数字', {icon: 7, time: 1000});
+     
+         } else if(res.data.message == '参数nickname格式错误'){
+           layer.msg('昵称为2位以上的中文', {icon: 7, time: 1000});
+       
+       } 
+       }else if(res.data.code == 1) {
+         layer.msg('注册成功', {icon: 6, time: 1000});  
+         window.location.href='login.html';
+       }else {
+        layer.msg(res.data.message, {icon: 7, time: 1000});
+       }
+       console.log(res);
+     })
+   });
+ });
+</script>
